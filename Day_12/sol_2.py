@@ -8,6 +8,16 @@ class Direction(Enum):
     SOUTH = (0, 1)
     WEST = (-1, 0)
 
+    def ccw(self):
+        #counter-clockwise
+        rotations = [Direction.NORTH, Direction.WEST, Direction.SOUTH, Direction.EAST]
+        return rotations[(rotations.index(self) - 1) % 4]
+
+    def cw(self):
+        #clockwise
+        rotations = [Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST]
+        return rotations[(rotations.index(self) - 1) % 4]
+
 class Point:
     def __init__(self, x: int, y: int):
         self.x = x
@@ -39,7 +49,7 @@ class Grid:
         return self.grid[point.y][point.x]
 
 def total_fence_price(grid: Grid) -> int:
-    sums = [0, 0]
+    score = 0
     seen: Set[Point] = set()
 
     for y in range(grid.height):
@@ -49,7 +59,7 @@ def total_fence_price(grid: Grid) -> int:
                 queue = deque([p])
                 region_points: Set[Point] = set()
                 area = 0
-                perimeter = 0
+                num_sides = 0
 
                 while queue:
                     q = queue.popleft()
@@ -58,15 +68,30 @@ def total_fence_price(grid: Grid) -> int:
                         continue
 
                     area += 1
-                    perimeter += 4 - 2 * sum(1 for adj in q.adjacents(False) if adj in region_points)
+
+                    for dir in Direction:
+                        forward = q.go(dir)
+                        left = q.go(dir.ccw())
+                        right = q.go(dir.cw())
+
+                        if forward in region_points:
+                            num_sides -= 1
+                            for side in [left, right]:
+                                if side not in region_points and side.go(dir) in region_points:
+                                    num_sides += 1
+                        else:
+                            num_sides += 1
+                            for side in [left, right]:
+                                if side in region_points and side.go(dir) not in region_points:
+                                    num_sides -= 1
 
                     region_points.add(q)
                     queue.extend(adj for adj in q.adjacents(False) if adj not in region_points)
 
                 seen.update(region_points)
-                sums[0] += area * perimeter
+                score += area * num_sides
 
-    return sums[0]
+    return score
 
 with open("./input.txt", "r") as fileToRead:
     grid = []
