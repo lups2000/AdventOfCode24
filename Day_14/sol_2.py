@@ -22,8 +22,8 @@ def simulate_movements_all(grid, positions, speeds, filename):
     with open(filename, "w") as file:
         for t in range(seconds):
             new_positions = []
+            grid = [[0 for _ in range(cols)] for _ in range(rows)]
             for (pos_x, pos_y), (speed_x, speed_y) in zip(positions, speeds):
-                grid[pos_y][pos_x] -= 1
                 pos_x = (pos_x + speed_x) % cols
                 pos_y = (pos_y + speed_y) % rows
                 grid[pos_y][pos_x] += 1
