@@ -1,3 +1,6 @@
+from collections import deque
+
+
 def perform_instruction(instr, operand, registers):
     operands = {
         0: 0,
@@ -49,21 +52,47 @@ with open("./input.txt", "r") as fileToRead:
             registers['C'] = int(line[11:])
         elif "Program" in line:
             program = [int(el) for el in line[8:].split(",")]
+ 
+    def find_A(program, ans):
+        if not program:
+            return ans
+        for t in range(8):
+            a = ans << 3 | t
+            b = a % 8
+            b = b ^ 1
+            c = a >> b
+            b = b ^ c
+            b = b ^ 6
+            if b % 8 == program[-1]:
+                sub = find_A(program[:-1], a)
+                if not sub:
+                    continue
+                return sub
+            
+    print(find_A(program, 0))
+"""
 
-    i = 0
-    outputs = []
-    while i < len(program) - 1:
-        instruction = program[i]
-        operand = program[i + 1]
-        res = perform_instruction(instruction, operand, registers)
+Program: 2,4,1,1,7,5,4,0,0,3,1,6,5,5,3,0
 
-        if res is not None:
-            outputs.append(res)
+- instr: 2 , operand: 4 (register A) --> modify register B
+- instr: 1, operand: 1 -> modify register B
+- instr: 7, operand: 5 (register B) -> modify register C
+- instr: 4, operand: 0 -> modify register B
+- instr: 0, operand: 3 -> modify register A
+- instr: 1, operand: 6 -> modify register B
+- instr: 5, operand: 5 (register B) -> print
+- instr: 3, operand: 0 -> jump
 
-        if instruction == 3 and registers['A'] != 0:
-            i = operand
-        else:
-            i += 2
+this is repeated until A is 0
 
-print(",".join(map(str, outputs)))
-print(registers)
+do:
+    b = a % 8
+    b = b ^ 1
+    c = a // (2**b)
+    b = b ^ c
+    a = a // 8
+    b = b ^ 6
+    out(b % 8)
+while A != 0
+
+"""
