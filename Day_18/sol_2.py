@@ -9,10 +9,11 @@ def simulate_bytes_fall(grid, bytes):
         grid[y][x] = "#"
     return grid
 
-def bfs(grid, start_r, start_c, visited):
+def bfs(grid):
     rows, cols = len(grid), len(grid[0])
-    q = deque([(start_r, start_c)])
-    visited.add((start_r, start_c))
+    q = deque([(0, 0)])
+    visited = set()
+    visited.add((0, 0))
     directions = [(1,0),(0,-1),(-1,0),(0,1)]
     length = 0
     while q:
@@ -32,6 +33,28 @@ def bfs(grid, start_r, start_c, visited):
         length += 1
     return None
 
+def binary_search(bytes, start, end):
+    grid = [["."] * 71 for _ in range(71)]
+    last_simulated_index = -1  # Track how many bytes have been simulated
+
+    while start <= end:
+        mid = (start + end) // 2
+
+        if mid > last_simulated_index:
+            simulate_bytes_fall(grid, bytes[last_simulated_index + 1:mid + 1])
+        elif mid < last_simulated_index:
+            grid = [["."] * 71 for _ in range(71)] # reset grid
+            simulate_bytes_fall(grid, bytes[:mid + 1])
+
+        last_simulated_index = mid
+
+        if bfs(grid):
+            start = mid + 1
+        else:
+            end = mid - 1
+
+    return start
+
 
 with open("./input.txt", "r") as fileToRead:
     bytes = []
@@ -40,12 +63,6 @@ with open("./input.txt", "r") as fileToRead:
         line = [int(el) for el in line.strip().split(",")]
         bytes.append(line)
 
-    for i in range(len(bytes)):
-        x, y = bytes[i]
-        grid = simulate_bytes_fall(grid, bytes[:i+1])
-        res = bfs(grid, 0, 0, set())
 
-        if not res:
-            print(x, y)
-            break
-    
+    bad_index = binary_search(bytes ,1024, len(bytes) - 1)
+    print(bytes[bad_index])
