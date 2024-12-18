@@ -9,11 +9,11 @@ def simulate_bytes_fall(grid, bytes):
         grid[y][x] = "#"
     return grid
 
-def bfs(grid, start_r, start_c):
+def bfs(grid):
     rows, cols = len(grid), len(grid[0])
-    q = deque([(start_r, start_c)])
+    q = deque([(0, 0)])
     visited = set()
-    visited.add((start_r, start_c))
+    visited.add((0, 0))
     directions = [(1,0),(0,-1),(-1,0),(0,1)]
     length = 0
     while q:
@@ -31,7 +31,7 @@ def bfs(grid, start_r, start_c):
                 q.append((nr, nc))
         
         length += 1
-
+    return None
 
 with open("./input.txt", "r") as fileToRead:
     bytes = []
@@ -41,5 +41,4 @@ with open("./input.txt", "r") as fileToRead:
         bytes.append(line)
 
     grid = simulate_bytes_fall(grid, bytes[:1025])
-    print_grid(grid)
-    print(bfs(grid, 0, 0))
+    print(bfs(grid))
